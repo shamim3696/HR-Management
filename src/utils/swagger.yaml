@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: HR Management API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /auth:
+    post:
+      summary: HR User Registration
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HrUserCreate'
+      responses:
+        '201':
+          description: Successfully registered HR user
+
+  /auth/login:
+    post:
+      summary: HR User Login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HrUserLogin'
+      responses:
+        '200':
+          description: Successfully logged in
+
+  /api/v1/employees:
+    post:
+      summary: Create new employee
+      tags:
+        - Employees
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateEmployee'
+      responses:
+        '201':
+          description: Successfully created employee
+    get:
+      summary: Get all employees with pagination and filters
+      tags:
+        - Employees
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search employee by name
+      responses:
+        '200':
+          description: List of employees
+
+  /api/v1/employees/{id}:
+    get:
+      summary: Get employee by ID
+      tags:
+        - Employees
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee details
+    patch:
+      summary: Update employee by ID
+      tags:
+        - Employees
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployee'
+      responses:
+        '200':
+          description: Employee updated
+    delete:
+      summary: Delete employee by ID
+      tags:
+        - Employees
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee deleted
+
+  /api/v1/attendance:
+    get:
+      summary: List attendance entries
+      tags:
+        - Attendance
+      parameters:
+        - in: query
+          name: employee_id
+          schema:
+            type: integer
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of attendance records
+    post:
+      summary: Create or upsert attendance
+      tags:
+        - Attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertAttendance'
+      responses:
+        '201':
+          description: Attendance created or updated
+
+  /api/v1/attendance/{id}:
+    get:
+      summary: Get attendance entry by ID
+      tags:
+        - Attendance
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Attendance details
+    put:
+      summary: Update attendance entry
+      tags:
+        - Attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAttendance'
+      responses:
+        '200':
+          description: Attendance updated
+    delete:
+      summary: Delete attendance entry
+      tags:
+        - Attendance
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Attendance deleted
+
+  /api/v1/attendance/reports/attendance:
+    get:
+      summary: Monthly attendance summary
+      tags:
+        - Reports
+      parameters:
+        - in: query
+          name: month
+          required: true
+          schema:
+            type: string
+            example: '2025-08'
+        - in: query
+          name: employee_id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Monthly attendance report
+
+components:
+  schemas:
+    HrUserCreate:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+      required:
+        - email
+        - password
+        - name
+
+    HrUserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    CreateEmployee:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+        designation:
+          type: string
+        hiring_date:
+          type: string
+          format: date
+        date_of_birth:
+          type: string
+          format: date
+        salary:
+          type: number
+        photo:
+          type: string
+          format: binary
+      required:
+        - name
+        - age
+        - designation
+        - hiring_date
+        - date_of_birth
+        - salary
+
+    UpdateEmployee:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+        designation:
+          type: string
+        salary:
+          type: number
+        photo:
+          type: string
+          format: binary
+
+    UpsertAttendance:
+      type: object
+      properties:
+        employee_id:
+          type: integer
+        date:
+          type: string
+          format: date
+        check_in_time:
+          type: string
+          format: time
+      required:
+        - employee_id
+        - date
+        - check_in_time
+
+    UpdateAttendance:
+      type: object
+      properties:
+        check_in_time:
+          type: string
+          format: time
